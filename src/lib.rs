@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![allow(unused_imports)]
 #![feature(iterator_fold_self)]
 
 mod day1;
@@ -8,3 +9,6 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
+
+mod intcodent;
