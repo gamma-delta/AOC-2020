@@ -1,4 +1,5 @@
 use anyhow::{bail, Result};
+use itertools::Itertools;
 use multiset::HashMultiSet;
 
 use std::collections::VecDeque;
@@ -36,12 +37,12 @@ impl Decoder {
 
     /// Receive a new number. Returns whether it was the sum of two previous numbers. (or an error)
     pub fn receive(&mut self, new: i64) -> Result<bool> {
+        let is_a_sum = self.sums.contains(&new);
+
         // Remove the last number and its sums
         let oldest = self.buffer.pop_front().unwrap();
-        print!("removing: ");
         for &other in self.buffer.iter() {
             let sum = oldest + other;
-            print!("{} ", sum);
             let existed = self.sums.remove(&sum);
             if !existed {
                 bail!(
@@ -52,23 +53,12 @@ impl Decoder {
                 );
             }
         }
-        println!();
-
-        // Check the newcomer
-        let is_a_sum = self.sums.contains(&new);
         // Add it to the sums
-        print!("adding: ");
         for &other in self.buffer.iter() {
             let sum = new + other;
-            print!("{} ", sum);
             self.sums.insert(sum);
         }
         self.buffer.push_back(new);
-
-        println!(
-            "\npopped off {}, adding {}\nbuffer: {:?}\nsums: {:?}\n",
-            oldest, new, &self.buffer, &self.sums
-        );
 
         Ok(is_a_sum)
     }
@@ -92,6 +82,78 @@ fn part1() -> Result<()> {
     }
 
     Ok(())
+}
 
-    // not 50, 17
+#[test]
+fn part2() -> Result<()> {
+    let transmission = INPUT
+        .lines()
+        .map(|line| Ok(line.parse()?))
+        .collect::<Result<Vec<i64>>>()?;
+    let (preamble, tail) = transmission.split_at(25);
+
+    let mut decoder = Decoder::new(preamble);
+    let invalid = *tail
+        .iter()
+        .map(|&num| decoder.receive(num).map(|success| (num, success)))
+        .map_results(|(num, success)| if !success { Some(num) } else { None })
+        .collect::<Result<Vec<_>>>()?
+        .iter()
+        .find_map(|it| it.as_ref())
+        .unwrap();
+    println!("our illegal number is {}", invalid);
+
+    for i in 0..transmission.len() {
+        for j in (i + 1)..transmission.len() {
+            let range = &transmission[i..=j];
+            let sum: i64 = range.iter().sum();
+            if sum == invalid {
+                // poggers
+                let (low, high) = range.iter().minmax().into_option().unwrap();
+                println!("weakness: {} from [{}, {}]", low + high, i, j);
+            }
+        }
+    }
+
+    Ok(())
+}
+
+#[test]
+fn part1_test() -> Result<()> {
+    let input = &r"35
+20
+15
+25
+47
+40
+62
+55
+65
+95
+102
+117
+150
+182
+127
+219
+299
+277
+309
+576";
+    let transmission = input
+        .lines()
+        .map(|line| Ok(line.parse()?))
+        .collect::<Result<Vec<i64>>>()?;
+    let (preamble, tail) = transmission.split_at(5);
+
+    let mut decoder = Decoder::new(preamble);
+    for &num in tail {
+        let sum_ok = decoder.receive(num)?;
+        if !sum_ok {
+            println!("{} was not present in the sums!", num);
+            break;
+        }
+    }
+
+    Ok(())
 }
