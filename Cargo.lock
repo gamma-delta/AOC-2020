@@ -20,6 +20,7 @@ name = "aoc_2020"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "multiset",
  "once_cell",
  "regex",
 ]
@@ -35,6 +36,12 @@ name = "memchr"
 version = "2.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ee1c47aaa256ecabcaea351eae4a9b01ef39ed810004e298d2511ed284b1525"
+
+[[package]]
+name = "multiset"
+version = "0.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce8738c9ddd350996cb8b8b718192851df960803764bcdaa3afb44a63b1ddb5c"
 
 [[package]]
 name = "once_cell"
