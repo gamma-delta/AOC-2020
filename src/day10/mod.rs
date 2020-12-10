@@ -1,6 +1,6 @@
 use anyhow::{bail, Result};
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 const INPUT: &str = include_str!("input.txt");
 
@@ -34,27 +34,40 @@ fn count_joltage_jumps(mut input: HashSet<u32>) -> Result<[u32; 3]> {
 /// Count the number of ways a set of chargers can go to the phone
 fn count_joltage_perms(input: HashSet<u32>) -> u128 {
     // Inner function to count the number of things an adapter can get plugged into
-    fn count_inner(jolts: u32, adapters: &HashSet<u32>, phone_jolts: u32) -> u128 {
+    // The cache maps (number of jolts we are looking for) -> (number of ways things can accept that and still win)
+    fn count_inner(
+        jolts: u32,
+        adapters: &HashSet<u32>,
+        phone_jolts: u32,
+        cache: &mut HashMap<u32, u128>,
+    ) -> u128 {
         (1..=3)
             .map(|delta| {
                 let looking_for = jolts + delta;
-                if looking_for == phone_jolts {
-                    // we're at the end of the line!
-                    // this permutation is OK
-                    1
-                } else if adapters.contains(&looking_for) {
-                    // let's keep going
-                    count_inner(looking_for, adapters, phone_jolts)
+                if let Some(&ans) = cache.get(&looking_for) {
+                    ans
                 } else {
-                    // this is invalid
-                    0
+                    let ans = if looking_for == phone_jolts {
+                        // we're at the end of the line!
+                        // this permutation is OK
+                        1
+                    } else if adapters.contains(&looking_for) {
+                        // let's keep going
+                        count_inner(looking_for, adapters, phone_jolts, cache)
+                    } else {
+                        // this is invalid
+                        0
+                    };
+                    cache.insert(looking_for, ans);
+                    ans
                 }
             })
             .sum()
     }
 
     let phone_jolts = input.iter().max().unwrap() + 3;
-    count_inner(0, &input, phone_jolts)
+    let mut cache = HashMap::new();
+    count_inner(0, &input, phone_jolts, &mut cache)
 }
 
 #[test]
