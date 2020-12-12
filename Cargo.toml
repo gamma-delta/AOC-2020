@@ -20,3 +20,4 @@ multiset = "0.0.5"
 itertools = "0.9.0"
 termcolor = "1.1.2"
 fwdansi = "1.1.0"
+cogs-gamedev = "0.1.6" # my own lib!
