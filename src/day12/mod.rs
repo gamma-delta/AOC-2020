@@ -55,7 +55,7 @@ impl FerryWithWaypoint {
     fn new() -> Self {
         Self {
             position: ICoord::new(0, 0),
-            dwaypoint: ICoord::new(10, 1),
+            dwaypoint: ICoord::new(10, -1),
         }
     }
 
